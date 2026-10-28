@@ -1,0 +1,56 @@
+# Renders the ZJX workload imagery twice daily and publishes it to GitHub Pages.
+# Schedule is UTC (Actions cron is UTC only): 10:30 UTC = 06:30 EDT / 05:30 EST,
+# 22:30 UTC = 18:30 EDT / 17:30 EST. Run it manually any time via workflow_dispatch.
+name: Update ZJX workload imagery
+
+on:
+  schedule:
+    - cron: "30 10 * * *"
+    - cron: "30 22 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Fetch GFS grid and render panels
+        run: |
+          mkdir -p site
+          TODAY=$(date -u +%F)
+          END=$(date -u -d "$TODAY +3 days" +%F)
+          python scripts/fetch_grid.py --start "$TODAY" --end "$END" --out grid.json
+          python scripts/make_string_panel.py grid.json "$TODAY" 4 N site/string-panel.png
+          python scripts/make_hourly_panel.py grid.json "$TODAY" N site/hourly-panel.png "GFS via Open-Meteo (fetched $(date -u +%F\ %H:%MZ))"
+          python scripts/build_site.py --site-dir site --updated "$(date -u +%F\ %H:%M\ UTC)"
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
