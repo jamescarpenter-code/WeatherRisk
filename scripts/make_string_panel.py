@@ -79,7 +79,7 @@ for ax, day in zip(axes.flat, days):
                 ax.plot([p[0] for p in ring2], [p[1] for p in ring2], color="#444444", lw=0.5)
     ax.plot(ring[:, 0], ring[:, 1], color="#b00000", lw=1.6, linestyle="--")
     cs = ax.contourf(Lon, Lat, ice, levels=[2.5, 5.5, 12.5], colors="none", hatches=["/", "//"])
-    for col in cs.collections:
+    for col in getattr(cs, 'collections', [cs]):
         col.set_edgecolor("#0066cc"); col.set_linewidth(0.5)
     ax.contour(Lon, Lat, TI, levels=[2, 4, 8], colors="#e67300", linewidths=[0.8, 1.2, 1.8])
     ax.streamplot(Lon, Lat, U200, V200, density=0.7, color="#555555", linewidth=0.6, arrowsize=0.7)
