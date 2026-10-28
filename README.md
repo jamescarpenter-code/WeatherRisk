@@ -5,11 +5,13 @@ rendered twice daily by GitHub Actions and published to GitHub Pages.
 
 ## What it renders
 
-- `string-panel.png` — one panel per day for the next 4 days (N shifts):
-  precipitation sum in inches, 200 mb streamlines, Ellrod turbulence contours,
-  icing-potential hatching, plus a per-day workload badge.
-- `hourly-panel.png` — four panels for one N shift (15/18/21/00Z) with
-  precip/icing accumulated from 12Z and a per-hour workload badge.
+- `string-panel-F.png` / `string-panel-N.png` — one panel per day for the
+  next 5 days, F shifts and N shifts respectively: precipitation sum in
+  inches, 200 mb streamlines, Ellrod turbulence contours, icing-potential
+  hatching, plus a per-day workload badge.
+- `hourly-panel-F.png` / `hourly-panel-N.png` — four panels for one shift
+  (F: 09/12/15/18Z with precip/icing accumulated from 06Z; N: 15/18/21/00Z
+  with precip/icing accumulated from 12Z) and a per-hour workload badge.
 
 Colors follow AWC conventions: precipitation in greens, Ellrod turbulence
 contours in orange, icing-potential hatching in blue.
@@ -40,6 +42,7 @@ streamlines, Ellrod contours, icing hatching) for a given date and shift:
 
 ## Automation
 
-`.github/workflows/update-imagery.yml` runs at 10:30 and 22:30 UTC daily
-(06:30/18:30 EDT, 05:30/17:30 EST) and deploys `site/` to GitHub Pages.
+`.github/workflows/update-imagery.yml` runs at 09:00 and 17:00 UTC daily
+and deploys `site/` to GitHub Pages. 09:00 UTC lands just before the F shift
+(0515–1315 ET); 17:00 UTC lands at the start of the N shift (1300–2100 ET).
 Repo Settings → Pages → Source: GitHub Actions. No secrets are needed.
