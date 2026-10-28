@@ -94,7 +94,7 @@ ax.text(-87.6, 34.6, "ZJX boundary (VATSIM vatspy-data-project, KZJX feature)", 
 # Icing-potential hours: hatched, blue (AWC-style)
 cs = ax.contourf(Lon, Lat, ice_hrs, levels=[2.5, 5.5, 12.5], colors="none",
                  hatches=["/", "//"])
-for col in cs.collections:
+for col in getattr(cs, 'collections', [cs]):
     col.set_edgecolor("#0066cc"); col.set_linewidth(0.6)
 # Ellrod contours: orange outlines (AWC-style)
 ec = ax.contour(Lon, Lat, TI, levels=[2, 4, 8], colors="#e67300", linewidths=[1.0, 1.6, 2.2])
