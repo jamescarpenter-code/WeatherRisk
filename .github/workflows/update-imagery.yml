@@ -1,12 +1,14 @@
 # Renders the ZJX workload imagery twice daily and publishes it to GitHub Pages.
-# Schedule is UTC (Actions cron is UTC only): 10:30 UTC = 06:30 EDT / 05:30 EST,
-# 22:30 UTC = 18:30 EDT / 17:30 EST. Run it manually any time via workflow_dispatch.
+# Schedule is UTC (Actions cron is UTC only): 09:00 UTC and 17:00 UTC.
+# 09:00 UTC lands just before the F shift (0515-1315 ET); 17:00 UTC lands at
+# the start of the N shift (1300-2100 ET). Run it manually any time via
+# workflow_dispatch.
 name: Update ZJX workload imagery
 
 on:
   schedule:
-    - cron: "30 10 * * *"
-    - cron: "30 22 * * *"
+    - cron: "0 9 * * *"
+    - cron: "0 17 * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,10 +36,14 @@ jobs:
         run: |
           mkdir -p site
           TODAY=$(date -u +%F)
-          END=$(date -u -d "$TODAY +3 days" +%F)
+          END=$(date -u -d "$TODAY +4 days" +%F)
           python scripts/fetch_grid.py --start "$TODAY" --end "$END" --out grid.json
-          python scripts/make_string_panel.py grid.json "$TODAY" 4 N site/string-panel.png
-          python scripts/make_hourly_panel.py grid.json "$TODAY" N site/hourly-panel.png "GFS via Open-Meteo (fetched $(date -u +%F\ %H:%MZ))"
+          # String panels: next 5 days, both shifts
+          python scripts/make_string_panel.py grid.json "$TODAY" 5 F site/string-panel-F.png
+          python scripts/make_string_panel.py grid.json "$TODAY" 5 N site/string-panel-N.png
+          # Hourly panels: today, both shifts
+          python scripts/make_hourly_panel.py grid.json "$TODAY" F site/hourly-panel-F.png "GFS via Open-Meteo (fetched $(date -u +%F\ %H:%MZ))"
+          python scripts/make_hourly_panel.py grid.json "$TODAY" N site/hourly-panel-N.png "GFS via Open-Meteo (fetched $(date -u +%F\ %H:%MZ))"
           python scripts/build_site.py --site-dir site --updated "$(date -u +%F\ %H:%M\ UTC)"
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
